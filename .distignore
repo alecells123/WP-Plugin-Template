@@ -13,3 +13,4 @@ package-lock.json
 phpunit.xml
 README.md
 webpack.config.js
+releases/v*

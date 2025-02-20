@@ -42,23 +42,33 @@ jobs:
           
       - name: Create ZIP excluding .distignore files
         run: |
+          # Create version directory
+          mkdir -p "releases/v${{ env.NEW_VERSION }}"
+          
           if [ -f .distignore ]; then
             EXCLUDE_ARGS=$(cat .distignore | sed 's/^/-x "/g' | sed 's/$/"/' | tr '\n' ' ')
-            zip -r "wp-plugin-template.zip" . $EXCLUDE_ARGS
+            zip -r "releases/v${{ env.NEW_VERSION }}/wp-plugin-template.zip" . $EXCLUDE_ARGS
           else
-            zip -r "wp-plugin-template.zip" . -x "*.git*" "*.github*" "releases/*"
+            zip -r "releases/v${{ env.NEW_VERSION }}/wp-plugin-template.zip" . -x "*.git*" "*.github*" "releases/*"
           fi
+          # Debug: Show directory structure
+          tree releases
+          # Debug: Check ZIP contents
+          unzip -l "releases/v${{ env.NEW_VERSION }}/wp-plugin-template.zip"
 
       - name: Create Release
         id: create_release
         uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: wp-plugin-template.zip
+          files: releases/v${{ env.NEW_VERSION }}/wp-plugin-template.zip
           tag_name: v${{ env.NEW_VERSION }}
           name: Release v${{ env.NEW_VERSION }}
           draft: false
           prerelease: false
           token: ${{ secrets.GITHUB_TOKEN }}
+          fail_on_unmatched_files: true
 
       - name: Commit update-info.json changes
         run: |
