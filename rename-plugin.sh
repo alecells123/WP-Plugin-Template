@@ -42,8 +42,24 @@ process_file() {
         sed -i "s|https://github.com/alecells123|$NEW_PLUGIN_URL|g" "$file"
         sed -i "s|Alec Ellsworth|$NEW_PLUGIN_AUTHOR|g" "$file"
         sed -i "s|https://https://github.com/alecells123/|$NEW_PLUGIN_AUTHOR_URL|g" "$file"
+
+        # Reset version numbers
+        sed -i "s/Version:.*[0-9]\+\.[0-9]\+\.[0-9]\+/Version:           0.0.0/" "$file"
+        sed -i "s/define( '.*_VERSION', '[0-9]\+\.[0-9]\+\.[0-9]\+' )/define( '${UNDERSCORE}_VERSION', '0.0.0' )/" "$file"
+        sed -i "s/@since.*[0-9]\+\.[0-9]\+\.[0-9]\+/@since      0.0.0/" "$file"
+        sed -i "s/\$this->version = '[0-9]\+\.[0-9]\+\.[0-9]\+';/\$this->version = '0.0.0';/" "$file"
     fi
 }
+
+# Create initial update-info.json with version 0.0.0
+cat > update-info.json << EOL
+{
+    "new_version": "0.0.0",
+    "url": "$NEW_PLUGIN_URL",
+    "package": "$NEW_PLUGIN_URL/releases/download/v0.0.0/${SLUG}.zip",
+    "version": "0.0.0"
+}
+EOL
 
 # Rename files and directories
 find . -depth -name "*wp-plugin-template*" -execdir bash -c '
@@ -73,4 +89,11 @@ echo "New plugin details:"
 echo "  Name: $NEW_PLUGIN_NAME"
 echo "  Slug: $SLUG"
 echo "  Main PHP Class: $CAMELCASE"
-echo "  Function Prefix: ${UNDERSCORE}_" 
+echo "  Function Prefix: ${UNDERSCORE}_"
+echo "  Initial Version: 0.0.0"
+echo ""
+echo "Next steps:"
+echo "1. Update your GitHub repository URL in update-info.json if different from $NEW_PLUGIN_URL"
+echo "2. Create an initial git tag: git tag v0.0.0"
+echo "3. Push the tag: git push origin v0.0.0"
+echo "4. Push your changes to trigger the first release" 
