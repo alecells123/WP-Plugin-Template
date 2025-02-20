@@ -36,10 +36,19 @@ jobs:
           # Modern way to set output
           echo "new_version=${NEW_VERSION}" >> "$GITHUB_OUTPUT"
 
-      - name: Update version in update-info.json
+      - name: Update version numbers
         run: |
-          jq --arg version "${{ env.NEW_VERSION }}" --arg package "https://github.com/alecells123/WP-Plugin-Template/releases/v${{ env.NEW_VERSION }}/wp-plugin-template.zip" '.version = $version | .new_version = $version | .package = $package' update-info.json > temp.json && mv temp.json update-info.json
+          # Update version in main plugin file header and constant
+          sed -i "s/Version:.*[0-9]\+\.[0-9]\+\.[0-9]\+/Version:           ${{ env.NEW_VERSION }}/" wp-plugin-template.php
+          sed -i "s/define( 'WP_PLUGIN_TEMPLATE_VERSION', '.*' )/define( 'WP_PLUGIN_TEMPLATE_VERSION', '${{ env.NEW_VERSION }}' )/" wp-plugin-template.php
           
+          # Update version in class file comments and fallback
+          sed -i "s/@since.*[0-9]\+\.[0-9]\+\.[0-9]\+/@since      ${{ env.NEW_VERSION }}/" includes/class-wp-plugin-template.php
+          sed -i "s/\$this->version = '[0-9]\+\.[0-9]\+\.[0-9]\+';/\$this->version = '${{ env.NEW_VERSION }}';/" includes/class-wp-plugin-template.php
+          
+          # Update update-info.json
+          jq --arg version "${{ env.NEW_VERSION }}" --arg package "https://github.com/alecells123/WP-Plugin-Template/releases/v${{ env.NEW_VERSION }}/wp-plugin-template.zip" '.version = $version | .new_version = $version | .package = $package' update-info.json > temp.json && mv temp.json update-info.json
+
       - name: Create ZIP excluding .distignore files
         run: |
           # Create version directory

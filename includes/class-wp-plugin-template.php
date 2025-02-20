@@ -70,7 +70,7 @@ class Wp_Plugin_Template {
 		if ( defined( 'WP_PLUGIN_TEMPLATE_VERSION' ) ) {
 			$this->version = WP_PLUGIN_TEMPLATE_VERSION;
 		} else {
-			$this->version = '1.0.0';
+			$this->version = '0.0.0';
 		}
 		$this->plugin_name = 'wp-plugin-template';
 
