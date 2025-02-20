@@ -1,0 +1,70 @@
+name: Create Release and Update Version
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        
+      - name: Get latest release version
+        id: get_version
+        run: |
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          CURRENT_VERSION=${LATEST_TAG#v}
+          IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+          MAJOR=${VERSION_PARTS[0]}
+          MINOR=${VERSION_PARTS[1]}
+          PATCH=$((VERSION_PARTS[2] + 1))
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "NEW_VERSION=$NEW_VERSION" >> $GITHUB_ENV
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Update version in update-info.json
+        run: |
+          jq --arg version "${{ env.NEW_VERSION }}" --arg package "https://github.com/alecells123/WP-Plugin-Template/releases/v${{ env.NEW_VERSION }}/wp-plugin-template.zip" '.version = $version | .new_version = $version | .package = $package' update-info.json > temp.json && mv temp.json update-info.json
+          
+      - name: Create ZIP excluding .distignore files
+        run: |
+          if [ -f .distignore ]; then
+            EXCLUDE_ARGS=$(cat .distignore | sed 's/^/-x "/g' | sed 's/$/"/' | tr '\n' ' ')
+            zip -r "wp-plugin-template.zip" . $EXCLUDE_ARGS
+          else
+            zip -r "wp-plugin-template.zip" . -x "*.git*" "*.github*" "releases/*"
+          fi
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ env.NEW_VERSION }}
+          release_name: Release v${{ env.NEW_VERSION }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./wp-plugin-template.zip
+          asset_name: wp-plugin-template.zip
+          asset_content_type: application/zip
+
+      - name: Commit update-info.json changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add update-info.json
+          git commit -m "Update version to v${{ env.NEW_VERSION }}"
+          git push

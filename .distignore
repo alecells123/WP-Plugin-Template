@@ -1,0 +1,15 @@
+.git
+.github
+.gitignore
+.distignore
+node_modules
+releases
+tests
+.editorconfig
+.eslintrc
+.travis.yml
+package.json
+package-lock.json
+phpunit.xml
+README.md
+webpack.config.js
