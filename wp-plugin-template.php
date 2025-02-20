@@ -74,10 +74,14 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-wp-plugin-template.php';
  * @since    1.0.0
  */
 function run_wp_plugin_template() {
-
-	$plugin = new Wp_Plugin_Template();
-	$plugin->run();
-
+    // Include the admin class file
+    require_once plugin_dir_path(__FILE__) . 'admin/class-wp-plugin-template-admin.php';
+    
+    // Initialize admin features
+    $plugin_admin = new WP_Plugin_Template_Admin();
+    
+    $plugin = new Wp_Plugin_Template();
+    $plugin->run();
 }
 
 /**

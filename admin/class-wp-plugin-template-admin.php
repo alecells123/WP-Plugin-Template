@@ -52,6 +52,8 @@ class Wp_Plugin_Template_Admin {
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
 
+		add_action('admin_menu', array($this, 'add_plugin_admin_menu'));
+
 	}
 
 	/**
@@ -98,6 +100,33 @@ class Wp_Plugin_Template_Admin {
 
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wp-plugin-template-admin.js', array( 'jquery' ), $this->version, false );
 
+	}
+
+	/**
+	 * Register the administration menu for this plugin into the WordPress Dashboard menu.
+	 */
+	public function add_plugin_admin_menu() {
+		add_menu_page(
+			'Plugin Settings', // Page title
+			'My Plugin', // Menu title
+			'manage_options', // Capability
+			'wp-plugin-template', // Menu slug
+			array($this, 'display_plugin_admin_page'), // Function to output the content
+			'dashicons-admin-generic', // Icon (you can change this)
+			100 // Position
+		);
+	}
+
+	/**
+	 * Render the admin page for this plugin.
+	 */
+	public function display_plugin_admin_page() {
+		?>
+		<div class="wrap">
+			<h1><?php echo esc_html(get_admin_page_title()); ?></h1>
+			<p>Hello World!</p>
+		</div>
+		<?php
 	}
 
 }

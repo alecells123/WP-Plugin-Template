@@ -3,7 +3,7 @@
 .gitignore
 .distignore
 node_modules
-releases
+releases/v*
 tests
 .editorconfig
 .eslintrc
@@ -13,4 +13,10 @@ package-lock.json
 phpunit.xml
 README.md
 webpack.config.js
-releases/v*
+rename-plugin.sh
+composer.json
+composer.lock
+phpcs.xml
+.phpcs.xml
+.env
+.env.example
