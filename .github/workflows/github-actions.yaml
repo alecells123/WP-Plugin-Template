@@ -46,19 +46,16 @@ jobs:
           sed -i "s/@since.*[0-9]\+\.[0-9]\+\.[0-9]\+/@since      ${{ env.NEW_VERSION }}/" includes/class-wp-plugin-template.php
           sed -i "s/\$this->version = '[0-9]\+\.[0-9]\+\.[0-9]\+';/\$this->version = '${{ env.NEW_VERSION }}';/" includes/class-wp-plugin-template.php
           
-          # Update update-info.json
-          jq --arg version "${{ env.NEW_VERSION }}" --arg package "https://github.com/alecells123/WP-Plugin-Template/releases/v${{ env.NEW_VERSION }}/wp-plugin-template.zip" '.version = $version | .new_version = $version | .package = $package' update-info.json > temp.json && mv temp.json update-info.json
+          # Update update-info.json with correct download URL structure
+          jq --arg version "${{ env.NEW_VERSION }}" --arg package "https://github.com/alecells123/WP-Plugin-Template/releases/download/v${{ env.NEW_VERSION }}/wp-plugin-template.zip" '.version = $version | .new_version = $version | .package = $package' update-info.json > temp.json && mv temp.json update-info.json
 
       - name: Create ZIP excluding .distignore files
         run: |
-          # Create version directory
-          mkdir -p "releases/v${{ env.NEW_VERSION }}"
-          
           if [ -f .distignore ]; then
             EXCLUDE_ARGS=$(cat .distignore | sed 's/^/-x "/g' | sed 's/$/"/' | tr '\n' ' ')
-            zip -r "releases/v${{ env.NEW_VERSION }}/wp-plugin-template.zip" . $EXCLUDE_ARGS
+            zip -r "wp-plugin-template.zip" . $EXCLUDE_ARGS
           else
-            zip -r "releases/v${{ env.NEW_VERSION }}/wp-plugin-template.zip" . -x "*.git*" "*.github*" "releases/*"
+            zip -r "wp-plugin-template.zip" . -x "*.git*" "*.github*" "releases/*"
           fi
           # Debug: Show directory structure
           tree releases
