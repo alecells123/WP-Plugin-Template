@@ -74,12 +74,6 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-wp-plugin-template.php';
  * @since    1.0.0
  */
 function run_wp_plugin_template() {
-    // Include the admin class file
-    require_once plugin_dir_path(__FILE__) . 'admin/class-wp-plugin-template-admin.php';
-    
-    // Initialize admin features with proper parameters
-    $plugin_admin = new Wp_Plugin_Template_Admin('wp-plugin-template', WP_PLUGIN_TEMPLATE_VERSION);
-    
     // Create plugin instance and run it
     $plugin = new Wp_Plugin_Template();
     $plugin->run();
